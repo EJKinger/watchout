@@ -38,7 +38,14 @@ var drag = d3.behavior.drag()
 var initialize = function(){
   //add svg
   d3.select("body").append("svg").attr("height", "500").attr("width", "500")
-    .append('rect').attr('height', 500).attr('width', 500).attr('fill', 'red').style('display', 'none');
+    .append("defs")
+    .append("pattern")
+    .attr("id", "bg")
+    .attr("height", 20)
+    .attr("width", 20)
+    .append("image")
+    .attr("xlink:href", "shuriken.png").attr('width', 20).attr('height', 20);
+  d3.select('svg').append('rect').attr('height', 500).attr('width', 500).attr('fill', 'red').style('display', 'none');
 
 };
 
@@ -46,8 +53,19 @@ var initialize = function(){
 
 var insertPlayers = function(){
   for (var i = 0; i < 10; i++){
-    d3.select("svg").append("circle").attr("class", "enemy").attr("cx", Math.random() * 500)
-    .attr("cy", Math.random() * 500).attr("r", 10).attr("fill", "black");
+    enemies[i] = d3.select("svg").append("circle").attr("class", "enemy").attr("cx", Math.random() * 500)
+      .attr("cy", Math.random() * 500).attr("r", 10).attr('fill', 'url(#bg)');
+      /*.append('defs')
+      .append('pattern').attr('id', 'img1').attr('patternUnits', 'userSpaceOnUse')
+        .attr('width', 20).attr('height', 20)
+        .append('image').attr('xlink:href', 'shuriken.png').attr('x', 0).attr('y', 0)*/
+
+      // <defs>
+      //   <pattern id="img1" patternUnits="userSpaceOnUse" width="100" height="100">
+      //   <image xlink:href="shuriken.png" x="0" y="0" width="20" height="20" />
+      //   </pattern>
+      // </defs>
+
   }
   var hero = d3.select("svg").append("circle").attr("class", "hero").attr("cx", 250)
     .attr("cy", 250).attr("r", 10).attr("fill", "blue").call(drag);
@@ -61,7 +79,9 @@ var updateEnemies = function(){
 var collisionCheck = function(){
   var enemy = d3.selectAll('.enemy')[0];
   var hero = d3.selectAll('.hero')[0][0];
+  rotate = (rotate + 2) % 360;
   for (var i = 0; i < 10; i++){
+    enemies[i].attr('transform', function() {return 'rotate(' + rotate + ' ' + enemies[i].attr('cx') + ' ' + enemies[i].attr('cy') + ')'})
     if (Math.abs(enemy[i].cx.animVal.value - hero.cx.animVal.value) <= 20 &&
         Math.abs(enemy[i].cy.animVal.value - hero.cy.animVal.value) <= 20 ){
       if(currentScore > highScore) {
@@ -83,10 +103,11 @@ var score = function(){
 
 
 
-var enemies = [];d3.selectAll(".enemy");
+var enemies = [];
 var currentScore = 0;
 var highScore = 0;
 var collisions = 0;
+var rotate = 0;
 
 
 initialize();
